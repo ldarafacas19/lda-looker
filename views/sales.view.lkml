@@ -1,6 +1,32 @@
 view: sales {
   sql_table_name: `lda_base_data.sales` ;;
 
+  parameter: date_granularity {
+    type: unquoted
+    allowed_value: {
+      label: "Year"
+      value: "year"
+    }
+    allowed_value: {
+      label: "Month"
+      value: "month"
+    }
+    allowed_value: {
+      label: "Week"
+      value: "week"
+    }
+  }
+
+  dimension: date {
+    sql: {% if date_granularity._parameter_value == 'year' %}
+          ${sale_date_year}
+        {% elsif date_granularity._parameter_value == 'month' %}
+          ${sale_date_month}
+        {% elsif date_granularity._parameter_value == 'week' %}
+          ${sale_date_week}
+        {% endif %} ;;
+  }
+
   dimension: primary_key {
     primary_key: yes
     type: string
@@ -16,6 +42,12 @@ view: sales {
   dimension: line_item_id {
     type: number
     sql: ${TABLE}.line_item_id ;;
+  }
+
+  dimension_group: clean_date{
+    type: time
+    timeframes: [raw, date, week, month, quarter, year]
+    sql: left(${TABLE}.date, 10) ;;
   }
 
   dimension_group: sale_date {

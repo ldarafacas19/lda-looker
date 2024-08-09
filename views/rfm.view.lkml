@@ -35,7 +35,7 @@ view: rfm {
     type: number
     sql: ${TABLE}.monetary ;;
     description: "Total customer spend"
-    # value_format_name: usd
+    value_format_name: usd
   }
 
   dimension: rfm_score {

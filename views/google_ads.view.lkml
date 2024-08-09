@@ -1,220 +1,261 @@
 view: google_ads {
   sql_table_name: `lda_base_data.google_ads` ;;
 
-  dimension: ad_group_id {
-    type: number
-    sql: ${TABLE}.ad_group_id ;;
-  }
-  dimension: ad_group_name {
+  # Flexible Hierarchical Composite Primary Key
+  dimension: primary_key {
+    primary_key: yes
     type: string
-    sql: ${TABLE}.ad_group_name ;;
+    sql: CONCAT(
+      COALESCE(CAST(${TABLE}.campaign_id AS STRING), 'null'), '-',
+      COALESCE(CAST(${TABLE}.ad_group_id AS STRING), 'null'), '-',
+      COALESCE(${TABLE}.keyword_info_text, 'null'), '-',
+      COALESCE(${TABLE}.match_type, 'null'), '-',
+      ${TABLE}.date
+    ) ;;
+    hidden: yes
   }
-  dimension: all_conversions_add_to_cart {
-    type: number
-    sql: ${TABLE}.all_conversions_add_to_cart ;;
+
+  # Date Dimension
+  dimension_group: ad {
+    type: time
+    timeframes: [date, week, month, quarter, year]
+    convert_tz: no
+    datatype: date
+    sql: ${TABLE}.date ;;
   }
-  dimension: all_conversions_checkout {
-    type: number
-    sql: ${TABLE}.all_conversions_checkout ;;
-  }
-  dimension: all_conversions_other_event {
-    type: number
-    sql: ${TABLE}.all_conversions_other_event ;;
-  }
-  dimension: all_conversions_purchase {
-    type: number
-    sql: ${TABLE}.all_conversions_purchase ;;
-  }
-  dimension: all_conversions_value_add_to_cart {
-    type: number
-    sql: ${TABLE}.all_conversions_value_add_to_cart ;;
-  }
-  dimension: all_conversions_value_checkout {
-    type: number
-    sql: ${TABLE}.all_conversions_value_checkout ;;
-  }
-  dimension: all_conversions_value_other_event {
-    type: number
-    sql: ${TABLE}.all_conversions_value_other_event ;;
-  }
-  dimension: all_conversions_value_purchase {
-    type: number
-    sql: ${TABLE}.all_conversions_value_purchase ;;
-  }
-  dimension: all_conversions_value_web_visits {
-    type: number
-    sql: ${TABLE}.all_conversions_value_web_visits ;;
-  }
-  dimension: all_conversions_web_visits {
-    type: number
-    sql: ${TABLE}.all_conversions_web_visits ;;
-  }
-  dimension: ao {
-    type: number
-    sql: ${TABLE}.`año` ;;
-  }
-  dimension: average_cpc {
-    type: number
-    sql: ${TABLE}.average_cpc ;;
-  }
-  dimension: average_cpm {
-    type: number
-    sql: ${TABLE}.average_cpm ;;
-  }
-  dimension: cac {
-    type: number
-    sql: ${TABLE}.CAC ;;
-  }
-  dimension: campaign_end_date {
-    type: string
-    sql: ${TABLE}.campaign_end_date ;;
-  }
+
+  # Campaign Structure
   dimension: campaign_id {
     type: number
     sql: ${TABLE}.campaign_id ;;
   }
+
   dimension: campaign_name {
     type: string
     sql: ${TABLE}.campaign_name ;;
   }
-  dimension: campaign_start_date {
+
+  dimension: ad_group_id {
+    type: number
+    sql: ${TABLE}.ad_group_id ;;
+  }
+
+  dimension: ad_group_name {
     type: string
-    sql: ${TABLE}.campaign_start_date ;;
+    sql: ${TABLE}.ad_group_name ;;
   }
-  dimension: clicks {
-    type: number
-    sql: ${TABLE}.clicks ;;
-  }
-  dimension: conversions_add_to_cart {
-    type: number
-    sql: ${TABLE}.conversions_add_to_cart ;;
-  }
-  dimension: conversions_checkout {
-    type: number
-    sql: ${TABLE}.conversions_checkout ;;
-  }
-  dimension: conversions_other_event {
-    type: number
-    sql: ${TABLE}.conversions_other_event ;;
-  }
-  dimension: conversions_purchase {
-    type: number
-    sql: ${TABLE}.conversions_purchase ;;
-  }
-  dimension: conversions_value_add_to_cart {
-    type: number
-    sql: ${TABLE}.conversions_value_add_to_cart ;;
-  }
-  dimension: conversions_value_checkout {
-    type: number
-    sql: ${TABLE}.conversions_value_checkout ;;
-  }
-  dimension: conversions_value_other_event {
-    type: number
-    sql: ${TABLE}.conversions_value_other_event ;;
-  }
-  dimension: conversions_value_purchase {
-    type: number
-    sql: ${TABLE}.conversions_value_purchase ;;
-  }
-  dimension: conversions_value_web_visits {
-    type: number
-    sql: ${TABLE}.conversions_value_web_visits ;;
-  }
-  dimension: conversions_web_visits {
-    type: number
-    sql: ${TABLE}.conversions_web_visits ;;
-  }
-  dimension: cost {
-    type: number
-    sql: ${TABLE}.cost ;;
-  }
-  dimension: cost_micros {
-    type: number
-    sql: ${TABLE}.cost_micros ;;
-  }
-  dimension: cost_per_conversion {
-    type: number
-    sql: ${TABLE}.cost_per_conversion ;;
-  }
-  dimension: ctr {
-    type: number
-    sql: ${TABLE}.ctr ;;
-  }
-  dimension: date {
-    type: string
-    sql: ${TABLE}.date ;;
-  }
-  dimension: impressions {
-    type: number
-    sql: ${TABLE}.impressions ;;
-  }
-  dimension: interactions_rate {
-    type: number
-    sql: ${TABLE}.interactions_rate ;;
-  }
+
+  # Keyword Information
   dimension: keyword_info_text {
     type: string
     sql: ${TABLE}.keyword_info_text ;;
   }
+
   dimension: keyword_match_type {
-    type: number
-    sql: ${TABLE}.keyword_match_type ;;
-  }
-  dimension: match_type {
     type: string
     sql: ${TABLE}.match_type ;;
   }
-  dimension: month {
-    type: number
-    sql: ${TABLE}.month ;;
+
+  # Granularity dimension
+  dimension: data_granularity {
+    type: string
+    sql: CASE
+           WHEN ${TABLE}.keyword_info_text IS NOT NULL AND ${TABLE}.match_type IS NOT NULL THEN 'Keyword'
+           WHEN ${TABLE}.ad_group_id IS NOT NULL THEN 'Ad Group'
+           WHEN ${TABLE}.campaign_id IS NOT NULL THEN 'Campaign'
+           ELSE 'Account'
+         END ;;
   }
+
+  # Performance Metrics
+  dimension: impressions {
+    type: number
+    sql: ${TABLE}.impressions ;;
+  }
+
+  dimension: clicks {
+    type: number
+    sql: ${TABLE}.clicks ;;
+  }
+
+  dimension: cost {
+    type: number
+    sql: ${TABLE}.cost ;;
+    value_format_name: usd
+  }
+
+  dimension: ctr {
+    type: number
+    sql: ${TABLE}.ctr ;;
+    value_format_name: percent_2
+  }
+
+  dimension: average_cpc {
+    type: number
+    sql: ${TABLE}.average_cpc ;;
+    value_format_name: usd
+  }
+
+  dimension: average_cpm {
+    type: number
+    sql: ${TABLE}.average_cpm ;;
+    value_format_name: usd
+  }
+
+  # Conversion Metrics
+  dimension: conversions_purchase {
+    type: number
+    sql: ${TABLE}.conversions_purchase ;;
+  }
+
+  dimension: conversions_value_purchase {
+    type: number
+    sql: ${TABLE}.conversions_value_purchase ;;
+    value_format_name: usd
+  }
+
+  dimension: roas {
+    type: number
+    sql: ${TABLE}.ROAS ;;
+    value_format_name: decimal_2
+  }
+
+  # Other Conversion Metrics
+  dimension: all_conversions_add_to_cart {
+    type: number
+    sql: ${TABLE}.all_conversions_add_to_cart ;;
+  }
+
+  dimension: all_conversions_checkout {
+    type: number
+    sql: ${TABLE}.all_conversions_checkout ;;
+  }
+
+  dimension: all_conversions_other_event {
+    type: number
+    sql: ${TABLE}.all_conversions_other_event ;;
+  }
+
+  dimension: all_conversions_web_visits {
+    type: number
+    sql: ${TABLE}.all_conversions_web_visits ;;
+  }
+
+  # Organization Information
   dimension: organization_id {
     type: string
     sql: ${TABLE}.organization_id ;;
   }
+
   dimension: organization_name {
     type: string
     sql: ${TABLE}.organization_name ;;
   }
-  dimension: purchase_conversion {
+
+  # Measures
+  measure: total_impressions {
+    type: sum
+    sql: ${impressions} ;;
+  }
+
+  measure: total_clicks {
+    type: sum
+    sql: ${clicks} ;;
+  }
+
+  measure: total_cost {
+    type: sum
+    sql: ${cost} ;;
+    value_format_name: usd
+  }
+
+  measure: average_ctr {
+    type: average
+    sql: ${ctr} ;;
+    value_format_name: percent_2
+  }
+
+  measure: average_cpc_overall {
     type: number
-    sql: ${TABLE}.purchase_conversion ;;
+    sql: ${total_cost} / NULLIF(${total_clicks}, 0) ;;
+    value_format_name: usd
   }
-  dimension: roas {
+
+  measure: average_cpm_overall {
     type: number
-    sql: ${TABLE}.ROAS ;;
+    sql: (${total_cost} / NULLIF(${total_impressions}, 0)) * 1000 ;;
+    value_format_name: usd
   }
-  dimension: unique_identifier {
-    type: string
-    sql: ${TABLE}.unique_identifier ;;
+
+  measure: total_conversions {
+    type: sum
+    sql: ${conversions_purchase} ;;
   }
-  dimension: value_per_conversion_add_to_cart {
+
+  measure: total_conversion_value {
+    type: sum
+    sql: ${conversions_value_purchase} ;;
+    value_format_name: usd
+  }
+
+  measure: overall_roas {
     type: number
-    sql: ${TABLE}.value_per_conversion_add_to_cart ;;
+    sql: ${total_conversion_value} / NULLIF(${total_cost}, 0) ;;
+    value_format_name: decimal_2
   }
-  dimension: value_per_conversion_checkout {
+
+  measure: conversion_rate {
     type: number
-    sql: ${TABLE}.value_per_conversion_checkout ;;
+    sql: ${total_conversions} / NULLIF(${total_clicks}, 0) ;;
+    value_format_name: percent_2
   }
-  dimension: value_per_conversion_other_event {
+
+  measure: cost_per_conversion {
     type: number
-    sql: ${TABLE}.value_per_conversion_other_event ;;
+    sql: ${total_cost} / NULLIF(${total_conversions}, 0) ;;
+    value_format_name: usd
   }
-  dimension: value_per_conversion_purchase {
-    type: number
-    sql: ${TABLE}.value_per_conversion_purchase ;;
+
+  measure: total_add_to_cart {
+    type: sum
+    sql: ${all_conversions_add_to_cart} ;;
   }
-  dimension: value_per_conversion_web_visits {
-    type: number
-    sql: ${TABLE}.value_per_conversion_web_visits ;;
+
+  measure: total_checkouts {
+    type: sum
+    sql: ${all_conversions_checkout} ;;
   }
-  dimension: week {
-    type: number
-    sql: ${TABLE}.week ;;
+
+  measure: total_other_conversions {
+    type: sum
+    sql: ${all_conversions_other_event} ;;
   }
-  measure: count {
-    type: count
-    drill_fields: [organization_name, ad_group_name, campaign_name]
+
+  measure: total_web_visits {
+    type: sum
+    sql: ${all_conversions_web_visits} ;;
+  }
+
+  # Sets
+  set: detail {
+    fields: [
+      campaign_id,
+      campaign_name,
+      ad_group_id,
+      ad_group_name,
+      keyword_info_text,
+      keyword_match_type,
+      ad_date,
+      data_granularity,
+      impressions,
+      clicks,
+      cost,
+      ctr,
+      average_cpc,
+      conversions_purchase,
+      conversions_value_purchase,
+      roas,
+      organization_name
+    ]
   }
 }

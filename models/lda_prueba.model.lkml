@@ -16,6 +16,18 @@ explore: sales {
     relationship: many_to_one
     sql_on: ${sales.user_id} = ${rfm.user_id} OR ${sales.email} = ${rfm.email} ;;
   }
+
+  join: meta_ads {
+    type: left_outer
+    relationship: many_to_many
+    sql_on: ${sales.date} = ${meta_ads.ad_date_date} ;;
+  }
+
+  join: google_ads {
+    type: left_outer
+    relationship: many_to_many
+    sql_on: ${sales.date} = ${google_ads.ad_date} ;;
+  }
 }
 
 explore: rfm {
