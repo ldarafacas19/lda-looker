@@ -19,11 +19,11 @@ view: sales {
 
   dimension: date {
     sql: {% if date_granularity._parameter_value == 'year' %}
-          ${sale_date_year}
+          ${sale_datetime_year}
         {% elsif date_granularity._parameter_value == 'month' %}
-          ${sale_date_month}
+          ${sale_datetime_month}
         {% elsif date_granularity._parameter_value == 'week' %}
-          ${sale_date_week}
+          ${sale_datetime_week}
         {% endif %} ;;
   }
 
@@ -44,26 +44,12 @@ view: sales {
     sql: ${TABLE}.line_item_id ;;
   }
 
-  dimension_group: clean_date{
-    type: time
-    timeframes: [raw, date, week, month, quarter, year]
-    sql: left(${TABLE}.date, 10) ;;
-  }
-
-  dimension_group: sale_date {
-    type: time
-    timeframes: [raw, date, week, month, quarter, year]
-    convert_tz: no
-    datatype: date
-    sql: ${TABLE}.date ;;
-  }
-
   dimension_group: sale_datetime {
     type: time
     timeframes: [raw, date, week, month, quarter, year]
     convert_tz: no
     datatype: datetime
-    sql: ${TABLE}.datetime ;;
+    sql: DATETIME(${TABLE}.datetime) ;;
   }
 
   # General Dimensions
