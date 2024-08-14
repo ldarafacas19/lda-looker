@@ -46,7 +46,7 @@ view: sales {
 
   dimension_group: sale_datetime {
     type: time
-    timeframes: [raw, date, week, month, quarter, year]
+    timeframes: [raw, date, week, month, quarter, year,day_of_week,day_of_month,hour_of_day]
     convert_tz: no
     datatype: datetime
     sql: DATETIME(${TABLE}.datetime) ;;
