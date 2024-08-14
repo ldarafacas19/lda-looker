@@ -2,6 +2,7 @@ connection: "linnda_bq"
 
 # include all the views
 include: "/views/**/*.view.lkml"
+include: "/**/*.dashboard"
 
 datagroup: lda_prueba_default_datagroup {
   # sql_trigger: SELECT MAX(id) FROM etl_log;;
@@ -11,6 +12,11 @@ datagroup: lda_prueba_default_datagroup {
 persist_with: lda_prueba_default_datagroup
 
 explore: sales {
+  access_filter: {
+    field: sales.organization_id
+    user_attribute: organization_id
+  }
+
   join: rfm {
     type: left_outer
     relationship: many_to_one
