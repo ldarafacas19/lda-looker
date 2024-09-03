@@ -12,6 +12,9 @@ datagroup: lda_prueba_default_datagroup {
 persist_with: lda_prueba_default_datagroup
 
 explore: sales {
+  label: "Sales and Customer Analysis"
+  description: "Analyze sales data with customer RFM metrics and advertising performance"
+
   access_filter: {
     field: sales.organization_id
     user_attribute: organization_id
@@ -20,27 +23,25 @@ explore: sales {
   join: rfm {
     type: left_outer
     relationship: many_to_one
-    sql_on: ${sales.user_id} = ${rfm.user_id} OR ${sales.email} = ${rfm.email} ;;
-  }
-
-  join: meta_ads {
-    type: left_outer
-    relationship: many_to_many
-    sql_on: ${sales.date} = ${meta_ads.ad_date_date} ;;
-  }
-
-  join: google_ads {
-    type: left_outer
-    relationship: many_to_many
-    sql_on: ${sales.date} = ${google_ads.ad_date} ;;
+    sql_on: sql_on: ${sales.organization_id} = ${rfm.organization_id} AND (${sales.user_id} = ${rfm.user_id} OR ${sales.email} = ${rfm.email}) ;;
+    fields: [rfm.recency, rfm.frequency, rfm.monetary, rfm.rfm_score, rfm.segment, rfm.loyalty_index]
   }
 }
 
 explore: rfm {
+  label: "Customer RFM Analysis"
+  description: "Analyze customer segments based on Recency, Frequency, and Monetary value"
+
+  access_filter: {
+    field: rfm.organization_id
+    user_attribute: organization_id
+  }
+
   join: sales {
     type: left_outer
     relationship: one_to_many
-    sql_on: ${rfm.user_id} = ${sales.user_id} OR ${rfm.email} = ${sales.email} ;;
+    sql_on: ${rfm.organization_id} = ${sales.organization_id} AND (${rfm.user_id} = ${sales.user_id} OR ${rfm.email} = ${sales.email}) ;;
+    # fields: [sales.total_sales, sales.total_units_sold, sales.average_order_value]
   }
 }
 
