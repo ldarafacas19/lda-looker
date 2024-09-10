@@ -11,14 +11,30 @@ datagroup: lda_prueba_default_datagroup {
 
 persist_with: lda_prueba_default_datagroup
 
+explore: analysis_ventas_por_hora_dia_de_la_semana_mes {}
+
+explore: reporteria_normal {}
+
+explore: reporteria_forecast {}
+
+explore: incrementalidad {}
+
+explore: mericas_generales_negocio_new_users_reteined_users_meta_spend_google_spend_revenue_per_segment {}
+
+explore: gasto_meta  {}
+
+explore: resumen_meta_por_organizacion {}
+
+explore: detalle_campanas_meta_por_organizacion {}
+
 explore: sales {
   label: "Sales and Customer Analysis"
   description: "Analyze sales data with customer RFM metrics and advertising performance"
 
-  access_filter: {
-    field: sales.organization_id
-    user_attribute: organization_id
-  }
+ # access_filter: {
+#    field: sales.organization_id
+#    user_attribute: organization_id
+#  }
 
   join: rfm {
     type: left_outer
