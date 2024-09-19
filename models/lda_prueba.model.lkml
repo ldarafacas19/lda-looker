@@ -9,6 +9,7 @@ datagroup: lda_prueba_default_datagroup {
   max_cache_age: "2 hour"
 }
 
+
 persist_with: lda_prueba_default_datagroup
 
 explore: analysis_ventas_por_hora_dia_de_la_semana_mes {}
