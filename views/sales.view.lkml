@@ -24,7 +24,7 @@ view: sales {
 
   # Order Information
   dimension: order_id {
-    group_label: "Order Info"
+    group_label: "Order Information"
     type: string
     sql: ${TABLE}.order_id ;;
     label: "Order ID"
